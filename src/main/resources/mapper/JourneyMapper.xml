@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wolfhouse.journeydaily.mapper.JourneyMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolfhouse.journeydaily.pojo.entity.Journey">
+        <id property="journeyId" column="journey_id" jdbcType="BIGINT"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="summary" column="summary" jdbcType="VARCHAR"/>
+        <result property="authorId" column="author_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <resultMap id="briefVoMap" type="com.wolfhouse.journeydaily.pojo.vo.JourneyBriefVo">
+        <id property="journeyId" column="journey_id" jdbcType="BIGINT"/>
+        <result property="summary" column="summary"/>
+        <result property="title" column="title"/>
+    </resultMap>
+
+    <select id="getBatchUserId" resultMap="briefVoMap">
+        select journey_id, summary, title
+        from journey
+        where author_id = #{userId}
+    </select>
+</mapper>

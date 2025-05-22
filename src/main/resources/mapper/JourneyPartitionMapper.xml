@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wolfhouse.journeydaily.mapper.JourneyPartitionMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolfhouse.journeydaily.pojo.entity.JourneyPartition">
+        <id property="partitionId" column="partition_id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="info" column="info" jdbcType="VARCHAR"/>
+        <result property="parent" column="parent" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,title,
+        info,parent
+    </sql>
+
+    <update id="removeParent">
+        update journey_partition
+        set parent = null
+        where parent = #{id}
+          and user_id = #{userId};
+    </update>
+
+    <insert id="insertWithGk" useGeneratedKeys="true" keyProperty="partitionId">
+        insert
+        into journey_partition(user_id, title, info, parent)
+            value (#{userId}, #{title}, #{info}, #{parent});
+    </insert>
+
+    <update id="updateByDto">
+        update journey_partition
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="info != null">info = #{info},</if>
+            parent = #{parent}
+        </set>
+        <where>
+            partition_id = #{partitionId}
+        </where>
+    </update>
+    <delete id="delete">
+        delete
+        from journey_partition
+        where partition_id = #{id}
+          and user_id = #{userId};
+    </delete>
+
+    <select id="hasPartitions" resultType="com.wolfhouse.journeydaily.pojo.entity.JourneyPartition">
+        select *
+        from journey_partition
+        <where>
+            user_id = #{userId}
+            and
+            partition_id in
+            <foreach collection="partitions" separator="," open="(" close=")" item="p">
+                #{p}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="hasTitles" resultType="java.lang.Long">
+        select partition_id
+        from journey_partition
+        <where>
+            user_id = #{userId}
+            and
+            title in
+            <foreach collection="titles" item="t" open="(" close=")">
+                #{t}
+            </foreach>
+        </where>
+    </select>
+</mapper>

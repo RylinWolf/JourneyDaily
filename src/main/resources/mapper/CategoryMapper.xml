@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wolfhouse.journeydaily.mapper.CategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolfhouse.journeydaily.pojo.entity.Category">
+            <id property="categoryId" column="category_id" jdbcType="BIGINT"/>
+            <id property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="info" column="info" jdbcType="VARCHAR"/>
+            <result property="parent" column="parent" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        category_id,user_id,title,
+        info,parent
+    </sql>
+</mapper>

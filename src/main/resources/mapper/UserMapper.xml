@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wolfhouse.journeydaily.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolfhouse.journeydaily.pojo.entity.User">
+        <id property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+        <result property="pwdHash" column="pwd_hash" jdbcType="VARCHAR"/>
+        <result property="tagline" column="tagline" jdbcType="VARCHAR"/>
+        <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <insert id="insertWithGeneratedKeys" useGeneratedKeys="true" keyProperty="userId">
+        insert into user
+        (user_name, email, pwd_hash
+        <if test="tagline != null">, tagline
+        </if>
+        )
+        value (#{userName}, #{email}, #{pwdHash}<if test="tagline != null">,#{tagline}</if>)
+    </insert>
+    <update id="updateById">
+        update user
+        <set>
+            <if test="tagline != null">
+                tagline = #{tagline},
+            </if>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+        </set>
+        <where>
+            user_id = #{userId}
+        </where>
+    </update>
+</mapper>

@@ -1,0 +1,22 @@
+jd:
+  datasource:
+    classname: com.mysql.cj.jdbc.Driver
+    host: 172.22.0.6
+    port: 3306
+    username: root
+    password: 123
+    database: journeyDaily
+
+  jwt:
+    user:
+      secret: aJWEgp[AWkrhjFSXLjkgepgAPGWE[rgkeglGSZDlkgwegp[qwg[W)_gqwgkGPDGOsope
+      ttl: 86400000
+      refresh-ttl: 3600000
+
+  admin:
+    add:
+      password: asdofjiaweohaw3pijyt23y0-hF_+3kgpakpswegkpawob3--125
+
+
+server:
+  port: 8999
