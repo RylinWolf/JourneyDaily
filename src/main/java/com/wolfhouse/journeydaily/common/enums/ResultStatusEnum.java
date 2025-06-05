@@ -2,10 +2,7 @@ package com.wolfhouse.journeydaily.common.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.wolfhouse.journeydaily.common.constant.ResultConstant;
-import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
 
 /**
  * @author linexsong

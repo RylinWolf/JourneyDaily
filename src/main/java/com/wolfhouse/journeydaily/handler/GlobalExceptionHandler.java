@@ -60,4 +60,10 @@ public class GlobalExceptionHandler {
         return Result.failed(null, ServiceExceptionConstant.INPUT_MISMATCHED);
     }
 
+    @ExceptionHandler
+    public Result<?> handlerException(NumberFormatException e) {
+        log.error("数字转换异常", e);
+        return Result.failed(null, ServiceExceptionConstant.NOT_NUMBER_FORMAT);
+    }
+
 }

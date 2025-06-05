@@ -3,6 +3,7 @@ package com.wolfhouse.journeydaily.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wolfhouse.journeydaily.pojo.dto.JourneyDto;
 import com.wolfhouse.journeydaily.pojo.dto.JourneyQueryDto;
+import com.wolfhouse.journeydaily.pojo.dto.JourneyUpdateDto;
 import com.wolfhouse.journeydaily.pojo.entity.Journey;
 import com.wolfhouse.journeydaily.pojo.vo.JourneyBriefVo;
 import com.wolfhouse.journeydaily.pojo.vo.JourneyVo;
@@ -29,7 +30,7 @@ public interface JourneyService extends IService<Journey> {
      * @param dto 查询 DTO
      * @return 日记列表
      */
-    PageResult<JourneyBriefVo> getJourneys(JourneyQueryDto dto);
+    PageResult<JourneyBriefVo> getJourneysBrief(JourneyQueryDto dto);
 
     /**
      * 根据 ID 获取日记
@@ -46,6 +47,30 @@ public interface JourneyService extends IService<Journey> {
      * @return 日记 Vo
      */
     JourneyVo update(JourneyDto dto);
+
+    /**
+     * 根据 Dto 更新日记，若日记不存在则添加
+     *
+     * @param dto 日记更新 Dto
+     * @return 日记 Vo
+     */
+    JourneyVo updateOrPost(JourneyUpdateDto dto);
+
+    /**
+     * 根据 Dto 更新日记，若日记不存在则添加
+     *
+     * @param dto 日记 Dto
+     * @return 日记 Vo
+     */
+    JourneyVo updateOrPost(JourneyDto dto);
+
+    /**
+     * 根据日记更新 Dto 进行增量更新
+     *
+     * @param dto 日记更新 Dto
+     * @return 日记 Vo
+     */
+    JourneyVo updatePatch(JourneyUpdateDto dto);
 
     /**
      * 根据 id 删除日记

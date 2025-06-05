@@ -66,7 +66,7 @@ public class Journey implements Serializable {
      * 日记分区
      */
     private Long partitionId;
-    
+
     /**
      * 日记字数统计
      */

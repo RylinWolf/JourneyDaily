@@ -12,4 +12,6 @@ public class ServiceExceptionConstant {
     public static final String AUTHORIZE_FAILED = "验证失败";
     public static final String LOGIN_REQUIRED = "请先登录";
     public static final String INPUT_MISMATCHED = "输入类型不匹配";
+    public static final String FIELD_NOT_ALLOWED = "字段不被接受";
+    public static final String NOT_NUMBER_FORMAT = "非数值类型";
 }

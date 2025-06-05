@@ -1,6 +1,7 @@
 package com.wolfhouse.journeydaily.config;
 
-import com.wolfhouse.journeydaily.common.util.JacksonObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wolfhouse.journeydaily.common.constant.CommonConstant;
 import com.wolfhouse.journeydaily.interceptors.JwtInterceptor;
 import com.wolfhouse.journeydaily.interceptors.TokenInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -21,6 +23,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -33,6 +36,10 @@ import java.util.List;
 public class WebMvcConfig extends WebMvcConfigurationSupport {
     private final JwtInterceptor jwtInterceptor;
     private final TokenInterceptor tokenInterceptor;
+    @Resource(name = "jacksonSnakeCaseObjectMapper")
+    private final ObjectMapper snakeCaseObjectMapper;
+    @Resource(name = "nonNullObjectMapper")
+    private final ObjectMapper nonNullObjectMapper;
 
     @Bean
     public Docket customDocket() {
@@ -63,17 +70,24 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
                 // 查看日记无须登录
                 .excludePathPatterns("/journey/*");
 
-        registry.addInterceptor(tokenInterceptor)
+        registry.addInterceptor(tokenInterceptor).addPathPatterns("/journeys").addPathPatterns("/journeys/*")
                 // 查看日记时注入 token 信息以显示当前登录用户的私密日记
-                .addPathPatterns("/journeys/*")
                 .addPathPatterns("/journey/*");
     }
 
     @Override
     protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        // 设置消息转换器
+        // 设置 Json 消息转换器
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(new JacksonObjectMapper());
+        converter.setObjectMapper(snakeCaseObjectMapper);
+
+        // 设置忽略空字段的 Json 消息转换器
+        MappingJackson2HttpMessageConverter notNonConverter = new MappingJackson2HttpMessageConverter();
+        notNonConverter.setObjectMapper(nonNullObjectMapper);
+        notNonConverter.setSupportedMediaTypes(List.of(new MediaType("application", CommonConstant.MEDIA_TYPE_PATCH)));
+
+        // 添加以上消息转换器
+        converters.add(0, notNonConverter);
         converters.add(0, converter);
     }
 
@@ -85,9 +99,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("开始设置静态资源映射...");
-        registry.addResourceHandler("/doc.html")
-                .addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }

@@ -1,0 +1,50 @@
+{
+  "mappings": {
+    "properties": {
+      "journey_id": {
+        "type": "keyword"
+      },
+      "author_id": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "ik_max_word"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "ik_smart"
+      },
+      "summary": {
+        "type": "text",
+        "analyzer": "ik_max_word"
+      },
+      "author": {
+        "type": "keyword"
+      },
+      "post_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:SS"
+      },
+      "edit_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:SS",
+        "index": false
+      },
+      "visibility": {
+        "type": "integer"
+      },
+      "partition_id": {
+        "type": "long"
+      },
+      "partition": {
+        "type": "text",
+        "index": false
+      },
+      "length": {
+        "type": "long",
+        "index": false
+      }
+    }
+  }
+}

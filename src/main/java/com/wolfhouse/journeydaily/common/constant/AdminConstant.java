@@ -6,6 +6,7 @@ package com.wolfhouse.journeydaily.common.constant;
 public class AdminConstant {
     public static final Integer IS_ADMIN = 1;
     public static final Integer NOT_ADMIN = 0;
+    public static final Long DEFAULT_ADMIN_ID = 0L;
     public static final String ADMIN_NOT_EXIST = "管理员不存在";
     public static final String ADMIN_HAS_EXIST = "管理员已存在";
     public static final String ADMIN_ADD_FAILED_UNKNOWN = "管理员添加失败！未知原因";

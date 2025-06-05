@@ -2,7 +2,6 @@ package com.wolfhouse.journeydaily.common.util;
 
 import com.wolfhouse.journeydaily.common.exceptions.BeanUtilException;
 import io.netty.util.internal.StringUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -33,7 +32,8 @@ public class BeanUtil {
         V v;
         try {
             // 通过反射获取目标对象的无参数构造函数并实例化
-            v = target.getDeclaredConstructor().newInstance();
+            v = target.getDeclaredConstructor()
+                      .newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
             // 如果反射实例化失败,则抛出 BeanUtilException 异常
@@ -43,7 +43,8 @@ public class BeanUtil {
         // 需要忽略空字段
         if (ignoreBlank) {
             // 获取 source 对象的字段
-            Field[] fields = source.getClass().getDeclaredFields();
+            Field[] fields = source.getClass()
+                                   .getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);
                 try {
@@ -57,7 +58,7 @@ public class BeanUtil {
             }
         }
         // 将源对象的所有字段复制到目标对象
-        BeanUtils.copyProperties(source, v);
+        cn.hutool.core.bean.BeanUtil.copyProperties(source, v);
 
         // 返回目标对象
         return v;
@@ -68,7 +69,9 @@ public class BeanUtil {
     }
 
     public static <T, V> List<V> copyList(List<T> source, Class<V> target) {
-        return source.stream().map(t -> BeanUtil.copyProperties(t, target)).toList();
+        return source.stream()
+                     .map(t -> BeanUtil.copyProperties(t, target))
+                     .toList();
     }
 
 
@@ -148,7 +151,8 @@ public class BeanUtil {
         for (Field field : clazz.getDeclaredFields()) {
             String name = field.getName();
             try {
-                Object fieldObj = clazz.getDeclaredMethod("get" + StringUtils.capitalize(name)).invoke(obj);
+                Object fieldObj = clazz.getDeclaredMethod("get" + StringUtils.capitalize(name))
+                                       .invoke(obj);
                 // 字段为空
                 if (isBlank(fieldObj)) {
                     blankFields.add(name);

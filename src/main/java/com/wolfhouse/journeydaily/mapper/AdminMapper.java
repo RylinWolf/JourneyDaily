@@ -5,7 +5,6 @@ import com.wolfhouse.journeydaily.pojo.dto.AdminDto;
 import com.wolfhouse.journeydaily.pojo.entity.Admin;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Update;
 
 /**
  * @author linexsong

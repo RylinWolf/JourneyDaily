@@ -1,8 +1,5 @@
 package com.wolfhouse.journeydaily.common.constant;
 
-import lombok.Getter;
-import org.springframework.stereotype.Component;
-
 /**
  * @author linexsong
  */

@@ -25,11 +25,14 @@ public class TokenInterceptor implements HandlerInterceptor {
     private final JwtProperties properties;
 
     @Override
-    public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
+    public boolean preHandle(@NotNull HttpServletRequest request,
+                             @NotNull HttpServletResponse response,
+                             @NotNull Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
         // 获取 token 并解析
+        log.info("解析 Token...");
         String token = request.getHeader(JwtConstant.TOKEN_NAME);
         if (!BeanUtil.isBlank(token)) {
             try {

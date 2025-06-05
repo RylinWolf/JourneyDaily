@@ -23,19 +23,19 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JourneyQueryDto extends PageQuery implements Serializable {
-    private Long authorId;
-    private Long journeyId;
-    private Long partitionId;
-    private String title;
-    private Integer visibility;
-    private String orderBy;
-    private Boolean isAsc;
+    protected Long authorId;
+    protected Long journeyId;
+    protected Long partitionId;
+    protected String title;
+    protected Integer visibility;
+    protected String orderBy;
+    protected Boolean isAsc;
 
     public Page<Journey> toPageOrderByDefault() {
         return this.toPage(this.orderBy, this.isAsc != null && this.isAsc);
     }
 
     public Page<Journey> toPageOrderByPostTime(boolean asc) {
-        return this.toPage(JourneyConstant.POST_TIME_FIELD, asc);
+        return this.toPage(JourneyConstant.POST_TIME_DB, asc);
     }
 }

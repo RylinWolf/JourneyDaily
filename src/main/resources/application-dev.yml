@@ -1,7 +1,7 @@
 jd:
   datasource:
     classname: com.mysql.cj.jdbc.Driver
-    host: 172.22.0.6
+    host: 172.22.0.3
     port: 3306
     username: root
     password: 123
@@ -17,6 +17,9 @@ jd:
     add:
       password: asdofjiaweohaw3pijyt23y0-hF_+3kgpakpswegkpawob3--125
 
+  es:
+    host: 172.22.0.4
+    port: 9200
 
 server:
   port: 8999

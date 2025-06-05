@@ -1,9 +1,9 @@
 package com.wolfhouse.journeydaily.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wolfhouse.journeydaily.mapper.CategoryMapper;
 import com.wolfhouse.journeydaily.pojo.entity.Category;
 import com.wolfhouse.journeydaily.service.CategoryService;
-import com.wolfhouse.journeydaily.mapper.CategoryMapper;
 import org.springframework.stereotype.Service;
 
 /**
