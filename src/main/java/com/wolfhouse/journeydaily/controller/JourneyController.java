@@ -4,6 +4,7 @@ import com.wolfhouse.journeydaily.common.constant.CommonConstant;
 import com.wolfhouse.journeydaily.common.constant.JourneyConstant;
 import com.wolfhouse.journeydaily.common.util.BeanUtil;
 import com.wolfhouse.journeydaily.common.util.Result;
+import com.wolfhouse.journeydaily.mq.service.JourneyMqService;
 import com.wolfhouse.journeydaily.pojo.doc.JourneyDoc;
 import com.wolfhouse.journeydaily.pojo.dto.JourneyDto;
 import com.wolfhouse.journeydaily.pojo.dto.JourneyEsQueryDto;
@@ -33,6 +34,7 @@ import java.io.IOException;
 public class JourneyController {
     private final JourneyService service;
     private final JourneyEsService esService;
+    private final JourneyMqService mqService;
     private final DraftJourneysService draftService;
 
     @PostMapping("/list")
@@ -63,21 +65,22 @@ public class JourneyController {
 
     @PostMapping
     @ApiOperation("发布日记")
-    public Result<JourneyVo> postJourney(@RequestBody JourneyDto dto) throws IOException {
+    public Result<JourneyVo> postJourney(@RequestBody JourneyDto dto) {
         JourneyVo post = service.post(dto);
         if (BeanUtil.isBlank(post)) {
             return Result.failed(null, JourneyConstant.POST_FAILED);
         }
-        esService.postJourneyDoc(BeanUtil.copyProperties(dto, JourneyDoc.class));
+        // 发布消息
+        mqService.postJourney(post);
         return Result.success(post);
     }
 
     @PatchMapping(consumes = {"application/" + CommonConstant.MEDIA_TYPE_PATCH})
     @ApiOperation("更新日记")
     @Transactional(rollbackFor = Exception.class)
-    public Result<JourneyVo> update(@RequestBody JourneyUpdateDto dto) throws IOException {
+    public Result<JourneyVo> update(@RequestBody JourneyUpdateDto dto) {
         JourneyVo vo = service.updatePatch(dto);
-        esService.updateJourney(dto.getJourneyId(), dto);
+        mqService.updateJourney(dto.getJourneyId(), dto);
         return Result.success(vo);
     }
 
@@ -85,18 +88,20 @@ public class JourneyController {
     @ApiOperation("删除日记")
     @Transactional(rollbackFor = Exception.class)
     public Result<?> delete(@RequestParam Long journeyId) throws IOException {
-        return service.delete(journeyId) &&
-               esService.deleteJourneyById(String.valueOf(journeyId)) ? Result.success() :
-               Result.failed(JourneyConstant.JOURNEY_DELETED_FAILED);
+        if (!service.delete(journeyId)) {
+            return Result.failed(JourneyConstant.JOURNEY_DELETED_FAILED);
+        }
+        mqService.deleteJourney(journeyId);
+        return Result.success();
     }
 
     @PutMapping("/recovery")
     @ApiOperation("恢复日记")
     @Transactional(rollbackFor = Exception.class)
-    public Result<JourneyVo> recovery(@RequestParam Long journeyId) throws IOException {
+    public Result<JourneyVo> recovery(@RequestParam Long journeyId) {
         JourneyVo vo = service.recovery(journeyId);
         if (!BeanUtil.isBlank(vo)) {
-            esService.postJourneyDoc(BeanUtil.copyProperties(service.getJourneyVoById(journeyId), JourneyDoc.class));
+            mqService.postJourney(vo);
             return Result.success(vo);
         }
         return Result.failed(null, JourneyConstant.JOURNEY_RECOVERY_FAILED);

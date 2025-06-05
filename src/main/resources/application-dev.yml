@@ -21,5 +21,13 @@ jd:
     host: 172.22.0.4
     port: 9200
 
+  mq:
+    host: 172.22.0.5
+    port: 5672
+    virtual-host: /journeyDaily
+    username: linex
+    password: 123321
+
+
 server:
   port: 8999

@@ -8,6 +8,12 @@ spring:
       username: ${jd.datasource.username}
       password: ${jd.datasource.password}
       url: jdbc:mysql://${jd.datasource.host}:${jd.datasource.port}/${jd.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+  rabbitmq:
+    host: ${jd.mq.host}
+    port: ${jd.mq.port}
+    virtual-host: ${jd.mq.virtual-host}
+    username: ${jd.mq.username}
+    password: ${jd.mq.password}
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -19,10 +25,11 @@ mybatis-plus:
     db-config:
       logic-delete-value: 1
       logic-not-delete-value: 0
+jd:
+  es:
+    host: ${jd.es.host}
+    port: ${jd.es.port}
 
-es:
-  host: ${jd.es.host}
-  port: ${jd.es.port}
 
 logging:
   level:
