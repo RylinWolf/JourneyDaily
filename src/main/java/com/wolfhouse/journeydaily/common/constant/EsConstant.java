@@ -34,8 +34,8 @@ public class EsConstant {
             StringBuilder json = new StringBuilder();
             try {
                 // 创建 Reader，读取文件
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(res.getInputStream(), StandardCharsets.UTF_8));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(res.getInputStream(),
+                                                                                 StandardCharsets.UTF_8));
                 String line;
                 while ((line = reader.readLine()) != null) {
                     json.append(line)
@@ -45,7 +45,7 @@ public class EsConstant {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            // 设置变量为文件内容
+            // 设置常量为文件内容
             JOURNEY_INDEX_STRUCTURE = json.toString();
         }
     }

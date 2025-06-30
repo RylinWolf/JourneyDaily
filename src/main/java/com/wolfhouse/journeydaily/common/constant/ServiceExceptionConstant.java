@@ -14,4 +14,7 @@ public class ServiceExceptionConstant {
     public static final String INPUT_MISMATCHED = "输入类型不匹配";
     public static final String FIELD_NOT_ALLOWED = "字段不被接受";
     public static final String NOT_NUMBER_FORMAT = "非数值类型";
+    public static final String MQ_ERROR = "消息队列异常";
+    public static final String SYSTEM_ERROR = "系统异常";
+    public static final String SERVICE_ERROR = "服务异常";
 }

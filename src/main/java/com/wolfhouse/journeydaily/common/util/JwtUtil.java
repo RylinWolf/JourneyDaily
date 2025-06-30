@@ -18,7 +18,6 @@ public class JwtUtil {
      */
     static SignatureAlgorithm sig = SignatureAlgorithm.HS256;
 
-    // 指定签名 Key
 
     /**
      * 创建 JWT
@@ -35,11 +34,7 @@ public class JwtUtil {
         var key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), sig.getJcaName());
 
         // 构建 JWT
-        return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(exp)
-                .signWith(key)
-                .compact();
+        return Jwts.builder().setClaims(claims).setExpiration(exp).signWith(key).compact();
     }
 
     public static Claims parseToken(String token, String secret) {
@@ -48,11 +43,7 @@ public class JwtUtil {
         }
         var key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), sig.getJcaName());
 
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
 }

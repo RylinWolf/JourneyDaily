@@ -20,7 +20,6 @@ import com.wolfhouse.journeydaily.pojo.dto.JourneyUpdateDto;
 import com.wolfhouse.journeydaily.pojo.entity.Journey;
 import com.wolfhouse.journeydaily.pojo.vo.JourneyVo;
 import com.wolfhouse.journeydaily.service.JourneyEsService;
-import com.wolfhouse.journeydaily.service.JourneyPartitionService;
 import com.wolfhouse.journeydaily.service.JourneyService;
 import com.wolfhouse.pagehelper.PageResult;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +46,6 @@ public class JourneyEsServiceImpl implements JourneyEsService {
     private final JourneyEsIndexClient indexClient;
     private final JourneyMapper journeyMapper;
     private final JourneyService journeyService;
-    private final JourneyPartitionService journeyPartitionService;
 
     @Override
     public List<JourneyDoc> getJourneyDocs(Integer from, Integer size) throws IOException {
@@ -74,13 +72,13 @@ public class JourneyEsServiceImpl implements JourneyEsService {
         JourneyEsQueryOrderDto order = dto.getOrder();
         boolean isOrder = order != null;
         if (isOrder) {
-            orderMap = Arrays.stream(dto.getOrder().getOrders())
+            orderMap = Arrays.stream(order.getOrders())
                              .collect(Collectors.toMap(JourneyEsQueryOrderDto.Orders::getOrderBy,
                                                        JourneyEsQueryOrderDto.Orders::getIsDesc));
             // 获取索引库映射字段，检查排序字段是否非法
             Map<String, String> indexProperties = indexClient.getMappingPropertiesOf(EsConstant.JOURNEY_INDEX_NAME);
             if (!orderMap.keySet().stream().allMatch(indexProperties::containsKey)) {
-                throw new ServiceException(JourneyConstant.ORDER_FIELD_NOT_ALLOWED);
+                throw new ServiceException(JourneyConstant.ORDER_FIELD_NOT_ALLOWED + orderMap.keySet());
             }
         }
 
@@ -90,7 +88,11 @@ public class JourneyEsServiceImpl implements JourneyEsService {
                                                                              dto.getIncludes(),
                                                                              dto.getExcludes());
         // 封装分页结果
-        return PageResult.<JourneyDoc>builder().total(result.getTotal()).list(result.getDocs()).build();
+        return PageResult.<JourneyDoc>builder()
+                         .total(result.getTotal())
+                         .list(result.getDocs())
+                         .pages((long) Math.ceil(result.getTotal() * 1.0 / dto.getPageSize()))
+                         .build();
     }
 
     @Override
@@ -129,7 +131,7 @@ public class JourneyEsServiceImpl implements JourneyEsService {
 
             try {
                 Object o = field.get(dto);
-                // JsonNullable 字段
+                // JsonNullable 字段 若存在内容则添加入更新字典
                 if (o instanceof JsonNullable<?> nullableField) {
                     nullableField.ifPresent(f -> {
                         // 标题或内容不得为空
@@ -141,12 +143,13 @@ public class JourneyEsServiceImpl implements JourneyEsService {
                     });
                     return;
                 }
+                // 其他字段均更新
                 updateMap.put(fName, o);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         });
-
+        // 执行更新
         docClient.updateJourneyDoc(String.valueOf(id), updateMap);
         return true;
     }

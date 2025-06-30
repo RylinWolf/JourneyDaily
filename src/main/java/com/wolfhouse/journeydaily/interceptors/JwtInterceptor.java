@@ -57,12 +57,10 @@ public class JwtInterceptor implements HandlerInterceptor {
             return false;
         }
         // 设置当前登录 UserId
-        Long userId = Long.valueOf(tokenClaim.get(UserConstant.USER_ID)
-                                             .toString());
+        Long userId = Long.valueOf(tokenClaim.get(UserConstant.USER_ID).toString());
         BaseContext.setUserId(userId);
         // 获取过期时间
-        Date date = new Date(Long.parseLong(tokenClaim.get(JwtConstant.EXPIRED_FIELD)
-                                                      .toString()) * 1000);
+        Date date = new Date(Long.parseLong(tokenClaim.get(JwtConstant.EXPIRED_FIELD).toString()) * 1000);
         log.info("token 过期时间: {}", date);
         Date newDate = new Date(System.currentTimeMillis() + properties.getRefreshTtl());
         if (date.before(newDate)) {
@@ -72,6 +70,16 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         log.info("JWT 权限验证: {}", BaseContext.getUserId());
         return true;
+    }
+
+    private static void resultRespWithErr(@NotNull HttpServletResponse response, int status, String msg) {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=utf-8");
+        try {
+            response.getWriter().write(new ObjectMapper().writeValueAsString(Result.failed(null, msg)));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -102,19 +110,8 @@ public class JwtInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             // 其他异常
             log.error("JWT 异常", e);
-            resultRespWithErr(response, Response.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            resultRespWithErr(response, Response.SC_PROXY_AUTHENTICATION_REQUIRED, e.getMessage());
             return false;
-        }
-    }
-
-    private static void resultRespWithErr(@NotNull HttpServletResponse response, int status, String msg) {
-        response.setStatus(status);
-        response.setContentType("application/json;charset=utf-8");
-        try {
-            response.getWriter()
-                    .write(new ObjectMapper().writeValueAsString(Result.failed(null, msg)));
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
         }
     }
 }

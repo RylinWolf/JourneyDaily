@@ -24,6 +24,6 @@ public class JourneyUpdateDto implements Serializable {
     private JsonNullable<String> summary = JsonNullable.undefined();
     private JsonNullable<Long> partitionId = JsonNullable.undefined();
     private JsonNullable<Integer> visibility = JsonNullable.undefined();
-    private String partition;
-    private Integer length;
+    private JsonNullable<Integer> length = JsonNullable.undefined();
+    private JsonNullable<String> partition = JsonNullable.undefined();
 }

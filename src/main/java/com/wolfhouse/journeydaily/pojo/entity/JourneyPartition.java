@@ -37,7 +37,7 @@ public class JourneyPartition implements Serializable {
     /**
      * 分区简介
      */
-    private String info;
+    private String description;
 
     /**
      * 分区所属上级

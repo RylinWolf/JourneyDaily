@@ -39,8 +39,6 @@ public class ObjectMapperConfig {
         ObjectMapper mapper = getJacksonDateObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.registerModule(new JsonNullableModule());
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-        System.out.println(mapper.getRegisteredModuleIds());
         return mapper;
     }
 
@@ -51,8 +49,8 @@ public class ObjectMapperConfig {
         javaTimeModule.addSerializer(LocalDateTime.class,
                                      new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         javaTimeModule.addDeserializer(LocalDateTime.class,
-                                       new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd " +
-                                                                                                 "HH:mm:ss")));
+                                       new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(
+                                               "yyyy-MM-dd " + "HH:mm:ss")));
 
         objectMapper.registerModule(javaTimeModule);
         return objectMapper;

@@ -65,7 +65,7 @@ public interface JourneyPartitionMapper extends BaseMapper<JourneyPartition> {
      * @param userId 用户 Id
      * @param id     父级 Id
      */
-    void removeParent(Long userId, Long id);
+    void changeParent(Long userId, Long id);
 }
 
 

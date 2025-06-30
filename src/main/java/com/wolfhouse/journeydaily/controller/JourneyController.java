@@ -19,6 +19,7 @@ import com.wolfhouse.pagehelper.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,15 +32,18 @@ import java.io.IOException;
 @RequestMapping("/journeys")
 @Api(tags = "日记管理")
 @RequiredArgsConstructor
+@Slf4j
 public class JourneyController {
     private final JourneyService service;
     private final JourneyEsService esService;
     private final JourneyMqService mqService;
     private final DraftJourneysService draftService;
 
+
     @PostMapping("/list")
     @ApiOperation("获取日记列表")
     public Result<PageResult<JourneyBriefVo>> getJourneys(@RequestBody JourneyQueryDto queryDto) {
+        log.info("获取日记列表: {}", queryDto);
         return Result.success(service.getJourneysBrief(queryDto));
     }
 
@@ -64,23 +68,41 @@ public class JourneyController {
     }
 
     @PostMapping
-    @ApiOperation("发布日记")
-    public Result<JourneyVo> postJourney(@RequestBody JourneyDto dto) {
+    @ApiOperation("发布日记并选择是否使用 AI 生成摘要")
+    public Result<JourneyVo> postJourney(@RequestBody JourneyDto dto,
+                                         @RequestParam(defaultValue = "false") Boolean useAiSummary) {
         JourneyVo post = service.post(dto);
         if (BeanUtil.isBlank(post)) {
             return Result.failed(null, JourneyConstant.POST_FAILED);
         }
         // 发布消息
         mqService.postJourney(post);
+
+        if (useAiSummary) {
+            // 清空摘要
+            dto.setSummary(null);
+            // 日记 AI 摘要消息
+            dto.setJourneyId(post.getJourneyId());
+            mqService.getAiSummary(dto);
+        }
         return Result.success(post);
     }
 
     @PatchMapping(consumes = {"application/" + CommonConstant.MEDIA_TYPE_PATCH})
-    @ApiOperation("更新日记")
+    @ApiOperation("更新日记并选择是否使用 AI 生成摘要")
     @Transactional(rollbackFor = Exception.class)
-    public Result<JourneyVo> update(@RequestBody JourneyUpdateDto dto) {
+    public Result<JourneyVo> update(@RequestBody JourneyUpdateDto dto,
+                                    @RequestParam(defaultValue = "false") Boolean useAiSummary) {
         JourneyVo vo = service.updatePatch(dto);
         mqService.updateJourney(dto.getJourneyId(), dto);
+        // 使用 AI 总结摘要
+        if (useAiSummary) {
+            // 清空摘要
+            vo.setSummary(null);
+            // 通知 AI 相关消息
+            mqService.getAiSummary(BeanUtil.copyProperties(vo, JourneyDto.class));
+
+        }
         return Result.success(vo);
     }
 

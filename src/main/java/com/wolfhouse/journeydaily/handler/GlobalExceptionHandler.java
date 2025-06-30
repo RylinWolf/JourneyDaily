@@ -21,13 +21,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public Result<?> handleException(Exception e) {
         log.error("系统异常", e);
-        return Result.error(null, e.getMessage());
+        return Result.error(null, ServiceExceptionConstant.SYSTEM_ERROR);
     }
 
     @ExceptionHandler
     public Result<?> handleException(ServiceException e) {
         log.error("服务异常", e);
-        return Result.failed(null, e.getMessage());
+        return Result.failed(null, ServiceExceptionConstant.SERVICE_ERROR);
     }
 
     @ExceptionHandler

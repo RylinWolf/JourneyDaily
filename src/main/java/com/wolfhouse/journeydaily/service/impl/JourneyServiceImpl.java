@@ -30,6 +30,7 @@ import com.wolfhouse.pagehelper.PageResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,12 +68,11 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
      */
     private static Boolean @NotNull [] getBooleans(JourneyDto dto, Journey journey) {
 
-        return new Boolean[]{
-                !Objects.equals(journey.getContent(), dto.getContent()) && !BeanUtil.isBlank(dto.getContent()),
-                !Objects.equals(journey.getTitle(), dto.getTitle()),
-                !Objects.equals(journey.getSummary(), dto.getSummary()),
-                !Objects.equals(journey.getPartitionId(), dto.getPartitionId()),
-                !Objects.equals(journey.getVisibility(), dto.getVisibility())};
+        return new Boolean[]{!Objects.equals(journey.getContent(), dto.getContent()) && !BeanUtil.isBlank(dto.getContent()),
+                             !Objects.equals(journey.getTitle(), dto.getTitle()),
+                             !Objects.equals(journey.getSummary(), dto.getSummary()),
+                             !Objects.equals(journey.getPartitionId(), dto.getPartitionId()),
+                             !Objects.equals(journey.getVisibility(), dto.getVisibility())};
     }
 
     /**
@@ -87,8 +87,7 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
      */
     private Boolean isJourneyEditable(Journey journey, Long userId) {
         return journey != null && (userId.equals(journey.getAuthorId()) ||
-                                   journey.getVisibility().equals(JourneyConstant.VISIBILITY_PUBLIC) &&
-                                   adminService.isJourneyAdmin(userId));
+                                   journey.getVisibility().equals(JourneyConstant.VISIBILITY_PUBLIC) && adminService.isJourneyAdmin(userId));
     }
 
     /**
@@ -119,6 +118,8 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
 
     @Override
     public PageResult<JourneyBriefVo> getJourneysBrief(JourneyQueryDto queryDto) {
+        Long login = BaseContext.getUserId();
+
         // 构建查询条件 顺序不得改变. 排序条件放于最后一位
         Boolean[] isQryBlk = BeanUtil.checkBlank(queryDto.getAuthorId(),
                                                  queryDto.getTitle(),
@@ -131,19 +132,23 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
 
         // 构建排序条件
         // 根据发布时间降序排序
-        Page<Journey> toPage = isQryBlk[isQryBlk.length -
-                                        1] ? queryDto.toPageOrderByPostTime(false) : queryDto.toPageOrderByDefault();
+        Page<Journey> toPage = isQryBlk[isQryBlk.length - 1] ? queryDto.toPageOrderByPostTime(false) : queryDto.toPageOrderByDefault();
 
         // 日记不为草稿
         Page<Journey> page = lambdaQuery().notIn(!draftJourneys.isEmpty(), Journey::getJourneyId, draftJourneys)
                                           .eq(!isQryBlk[0], Journey::getAuthorId, queryDto.getAuthorId())
-                                          // 若查询的作者非当前登录用户，则仅能查看公开权限的日记
-                                          .eq(!BaseContext.isCurrent(queryDto.getAuthorId()),
-                                              Journey::getVisibility,
-                                              JourneyConstant.VISIBILITY_PUBLIC)
                                           .like(!isQryBlk[1], Journey::getTitle, queryDto.getTitle())
                                           .eq(!isQryBlk[2], Journey::getVisibility, queryDto.getVisibility())
                                           .eq(!isQryBlk[3], Journey::getPartitionId, queryDto.getPartitionId())
+                                          // 若查询的作者非当前登录用户，则仅能查看公开权限的日记
+                                          .and(w -> w.eq(!BaseContext.isCurrent(queryDto.getAuthorId()),
+                                                         Journey::getVisibility,
+                                                         JourneyConstant.VISIBILITY_PUBLIC)
+                                                     // 可以查看当前登录用户的私人日记
+                                                     .or(!BeanUtil.isBlank(login),
+                                                         w2 -> w2.eq(Journey::getAuthorId, login)
+                                                                 .eq(Journey::getVisibility, JourneyConstant.VISIBILITY_PRIVATE)))
+
                                           .page(toPage);
 
         // 注入作者信息
@@ -207,8 +212,7 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
             throw ServiceException.requestNotAllowed();
         }
         // 日记未删除 或 恢复失败
-        if (lambdaQuery().eq(Journey::getJourneyId, jid).exists() ||
-            mapper.recovery(jid, CommonConstant.NOT_DELETED) != 1) {
+        if (lambdaQuery().eq(Journey::getJourneyId, jid).exists() || mapper.recovery(jid, CommonConstant.NOT_DELETED) != 1) {
             return null;
         }
         return getJourneyVoById(jid);
@@ -312,9 +316,7 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
                                 Journey::getPartitionId,
                                 dto.getPartitionId())
                            // 公开/私有权限
-                           .set(notBlanks[4], Journey::getVisibility, dto.getVisibility())
-                           .set(Journey::getEditTime, LocalDateTime.now())
-                           .update()) {
+                           .set(notBlanks[4], Journey::getVisibility, dto.getVisibility()).set(Journey::getEditTime, LocalDateTime.now()).update()) {
             // 更新失败
             throw new ServiceException(JourneyConstant.UPDATE_FAILED);
         }
@@ -353,8 +355,8 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
             wrapper.set(Journey::getContent, s);
             // 更新内容长度
             int contentLength = StrUtil.removeAll(s, JourneyConstant.REMOVE_CONTENT).length();
+            dto.setLength(JsonNullable.of(contentLength));
             wrapper.set(Journey::getLength, contentLength);
-            dto.setLength(contentLength);
         });
         dto.getSummary().ifPresent(s -> wrapper.set(Journey::getSummary, s));
         dto.getPartitionId().ifPresent(p -> {
@@ -364,7 +366,7 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
                 return;
             }
             wrapper.set(Journey::getPartitionId, p);
-            dto.setPartition(partition.getTitle());
+            dto.setPartition(JsonNullable.of(partition.getTitle()));
         });
 
         return mapper.update(wrapper) > 0 ? getJourneyVoById(dto.getJourneyId()) : null;
@@ -387,5 +389,25 @@ public class JourneyServiceImpl extends ServiceImpl<JourneyMapper, Journey> impl
             return update(dto);
         }
         return post(dto);
+    }
+
+    @Override
+    public List<Long> changePartition(Long partitionId, Long newPartitionId) {
+        if (partitionService.hasPartitions(newPartitionId).isEmpty()) {
+            throw new ServiceException(JourneyConstant.PARTITION_NOT_EXIST);
+        }
+
+        // 获取需要修改的日记 ID 列表
+        List<Long> ids = lambdaQuery().eq(Journey::getPartitionId, partitionId)
+                                      .select(Journey::getJourneyId)
+                                      .list()
+                                      .stream()
+                                      .map(Journey::getJourneyId)
+                                      .toList();
+
+        if (!lambdaUpdate().in(!ids.isEmpty(), Journey::getJourneyId, ids).set(Journey::getPartitionId, newPartitionId).update()) {
+            return List.of();
+        }
+        return ids;
     }
 }

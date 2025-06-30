@@ -9,10 +9,11 @@ import lombok.Getter;
  */
 @Getter
 public enum ResultStatusEnum {
-
-    SUCCESS(0, ResultConstant.SUCCESS),
-    FAILED(1, ResultConstant.FAILED),
-    ERROR(2, ResultConstant.ERROR);
+    /**
+     * 表示操作成功的状态。
+     * 该枚举常量的状态码为 0，对应的消息为 "success"。
+     */
+    SUCCESS(0, ResultConstant.SUCCESS), FAILED(1, ResultConstant.FAILED), ERROR(2, ResultConstant.ERROR);
     private final Integer statusCode;
     private final String msg;
 

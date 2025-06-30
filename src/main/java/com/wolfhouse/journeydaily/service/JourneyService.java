@@ -9,6 +9,8 @@ import com.wolfhouse.journeydaily.pojo.vo.JourneyBriefVo;
 import com.wolfhouse.journeydaily.pojo.vo.JourneyVo;
 import com.wolfhouse.pagehelper.PageResult;
 
+import java.util.List;
+
 /**
  * @author linexsong
  * @description 针对表【journey】的数据库操作Service
@@ -87,4 +89,13 @@ public interface JourneyService extends IService<Journey> {
      * @return 日记 Vo
      */
     JourneyVo recovery(Long jid);
+
+    /**
+     * 更改分区标识。
+     *
+     * @param partitionId    现有分区的标识
+     * @param newPartitionId 新分区的标识
+     * @return 返回更改操作是否成功，若成功则返回 true，否则返回 false
+     */
+    List<Long> changePartition(Long partitionId, Long newPartitionId);
 }

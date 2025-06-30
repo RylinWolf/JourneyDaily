@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wolfhouse.journeydaily.common.constant.EsConstant;
 import com.wolfhouse.journeydaily.common.util.BeanUtil;
+import com.wolfhouse.journeydaily.context.BaseContext;
 import com.wolfhouse.journeydaily.es.builder.JourneyQueryBuilder;
 import com.wolfhouse.journeydaily.pojo.doc.JourneyDoc;
 import com.wolfhouse.journeydaily.pojo.dto.JourneyEsQueryDto;
@@ -142,8 +143,9 @@ public class JourneyEsDocClient {
         docs.forEach(doc -> {
             try {
                 req.add(new IndexRequest(EsConstant.JOURNEY_INDEX_NAME).id(doc.getJourneyId())
-                                                                       .source(snakeCaseObjectMapper.writeValueAsString(
-                                                                               doc), XContentType.JSON));
+                                                                       .source(
+                                                                               snakeCaseObjectMapper.writeValueAsString(doc),
+                                                                               XContentType.JSON));
             } catch (JsonProcessingException e) {
                 // JSON 处理异常
                 throw new RuntimeException(e);
@@ -194,7 +196,7 @@ public class JourneyEsDocClient {
         // 创建查询请求
         SearchRequest req = new SearchRequest(EsConstant.JOURNEY_INDEX_NAME);
         // 构建复合查询条件
-        BoolQueryBuilder boolQuery = JourneyQueryBuilder.buildBoolQuery(dto);
+        BoolQueryBuilder boolQuery = JourneyQueryBuilder.buildBoolQuery(dto, BaseContext.getUserId());
         List<JourneyDoc> docs = new ArrayList<>();
         // 查询
         req.source().fetchSource(includes, excludes).query(boolQuery);

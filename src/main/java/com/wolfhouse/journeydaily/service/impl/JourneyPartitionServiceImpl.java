@@ -32,8 +32,9 @@ public class JourneyPartitionServiceImpl extends ServiceImpl<JourneyPartitionMap
     @Override
     public List<JourneyPartitionVo> getPartitions() {
         return BeanUtil.copyList(mapper.selectList(new QueryWrapper<JourneyPartition>().lambda()
-                        .eq(JourneyPartition::getUserId, BaseContext.getUserId())),
-                JourneyPartitionVo.class);
+                                                                                       .eq(JourneyPartition::getUserId,
+                                                                                           BaseContext.getUserId())),
+                                 JourneyPartitionVo.class);
     }
 
     /**
@@ -165,7 +166,7 @@ public class JourneyPartitionServiceImpl extends ServiceImpl<JourneyPartitionMap
     }
 
     @Override
-    @Transactional(rollbackFor = RuntimeException.class)
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deletePartition(Long partitionId) {
         // 分区不存在
         if (hasPartitions(partitionId).isEmpty()) {
@@ -173,8 +174,8 @@ public class JourneyPartitionServiceImpl extends ServiceImpl<JourneyPartitionMap
         }
         // 冗余防护
         Long userId = BaseContext.getUserId();
-        // 移除父级
-        mapper.removeParent(userId, partitionId);
+        // 修改父级
+        mapper.changeParent(userId, partitionId);
         // 删除分区
         if (mapper.delete(userId, partitionId) != 1) {
             // 删除失败

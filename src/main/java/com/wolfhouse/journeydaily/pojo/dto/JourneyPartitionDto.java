@@ -14,5 +14,5 @@ public class JourneyPartitionDto implements Serializable {
     private Long partitionId;
     private Long parent;
     private String title;
-    private String info;
+    private String description;
 }

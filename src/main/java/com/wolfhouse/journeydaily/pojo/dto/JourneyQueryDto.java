@@ -5,9 +5,9 @@ import com.wolfhouse.journeydaily.common.constant.JourneyConstant;
 import com.wolfhouse.journeydaily.pojo.entity.Journey;
 import com.wolfhouse.pagehelper.query.PageQuery;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -18,8 +18,8 @@ import java.io.Serializable;
  *
  * @author linexsong
  */
-@Setter
-@Getter
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class JourneyQueryDto extends PageQuery implements Serializable {
@@ -37,5 +37,12 @@ public class JourneyQueryDto extends PageQuery implements Serializable {
 
     public Page<Journey> toPageOrderByPostTime(boolean asc) {
         return this.toPage(JourneyConstant.POST_TIME_DB, asc);
+    }
+
+    @Override
+    public String toString() {
+        return "JourneyQueryDto{" + "authorId=" + authorId + ", journeyId=" + journeyId + ", partitionId=" +
+               partitionId + ", title='" + title + '\'' + ", visibility=" + visibility + ", orderBy='" + orderBy +
+               '\'' + ", isAsc=" + isAsc + '}' + "with super: " + super.toString();
     }
 }

@@ -36,6 +36,7 @@ import java.util.List;
 public class WebMvcConfig extends WebMvcConfigurationSupport {
     private final JwtInterceptor jwtInterceptor;
     private final TokenInterceptor tokenInterceptor;
+    private final ObjectMapper jacksonObjectMapper;
     @Resource(name = "jacksonSnakeCaseObjectMapper")
     private final ObjectMapper snakeCaseObjectMapper;
     @Resource(name = "nonNullObjectMapper")
@@ -77,23 +78,28 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     @Override
     protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        // 设置 Json 消息转换器
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(snakeCaseObjectMapper);
+        // 设置标准 Json 消息转换器
+        MappingJackson2HttpMessageConverter simpleConverter = new MappingJackson2HttpMessageConverter();
+        simpleConverter.setObjectMapper(jacksonObjectMapper);
 
         // 设置忽略空字段的 Json 消息转换器
         MappingJackson2HttpMessageConverter notNonConverter = new MappingJackson2HttpMessageConverter();
         notNonConverter.setObjectMapper(nonNullObjectMapper);
-        notNonConverter.setSupportedMediaTypes(List.of(new MediaType("application", CommonConstant.MEDIA_TYPE_PATCH)));
+        notNonConverter.setSupportedMediaTypes(MediaType.parseMediaTypes(
+                "application/" + CommonConstant.MEDIA_TYPE_PATCH));
 
         // 添加以上消息转换器
-        converters.add(0, notNonConverter);
-        converters.add(0, converter);
+        converters.add(0, simpleConverter);
+        converters.add(1, notNonConverter);
     }
 
     @Override
     protected void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:[*]")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 
     @Override
